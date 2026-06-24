@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>摸鱼签签到</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:linear-gradient(180deg,#e8f4fd,#7ec8e3);min-height:100vh;color:#333}
+.wrap{max-width:420px;margin:0 auto;padding:20px 16px}
+.hd{text-align:center;padding:20px 0 10px}
+.hd h1{font-size:26px;color:#1a73e8}
+.hd p{font-size:13px;color:#666;margin-top:4px}
+.card{background:#fff;border-radius:16px;padding:20px;margin:12px 0;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.row{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+.row .lb{font-size:14px;color:#666}
+.row .vl{font-size:14px;font-weight:600}
+.green{color:#34a853}
+.red{color:#ea4335}
+.week{display:flex;justify-content:space-between;gap:4px;margin-top:10px}
+.week .di{flex:1;text-align:center}
+.week .dn{font-size:12px;color:#666;margin-bottom:6px}
+.week .dc{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid #e0e0e0;background:#f5f5f5;margin:0 auto 4px}
+.week .dc.ok{border-color:#34a853;background:#e6f4ea}
+.week .dc.cur{border-color:#1a73e8;background:#e3f2fd}
+.week .ct{font-size:11px;color:#666}
+.fzone{text-align:center}
+.fzone h3{font-size:15px}
+.fzone .fn{font-size:13px;color:#666;margin:4px 0 12px}
+.fishbox{height:150px;display:flex;align-items:center;justify-content:center}
+.fishbox span{font-size:80px;display:inline-block;animation:sw 3s ease-in-out infinite}
+@keyframes sw{0%,100%{transform:translateX(0)}25%{transform:translateX(8px) rotate(2deg)}75%{transform:translateX(-8px) rotate(-2deg)}}
+.btn{display:inline-block;background:linear-gradient(135deg,#1a73e8,#4285f4);color:#fff;border:none;border-radius:30px;padding:14px 36px;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(26,115,232,.35);margin-top:12px}
+.btn:active{transform:scale(.96)}
+.btn:disabled{background:#bbb;box-shadow:none;cursor:not-allowed}
+.note{font-size:12px;color:#999;margin-top:8px}
+.reward{text-align:center;display:none}
+.reward.show{display:block}
+.reward .ri{font-size:48px}
+.reward h3{font-size:18px;color:#e8a020;margin:8px 0 4px}
+.reward p{font-size:13px;color:#666}
+
+.mask{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:100;justify-content:center;align-items:center;padding:16px}
+.mask.show{display:flex}
+.pop{background:#fff;border-radius:20px;width:100%;max-width:380px;padding:24px 20px;animation:pIn .3s ease-out}
+@keyframes pIn{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop .pt{font-size:18px;font-weight:700;text-align:center;margin-bottom:4px}
+.pop .ps{font-size:13px;color:#666;text-align:center;margin-bottom:16px}
+.dots{display:flex;justify-content:center;gap:8px;margin-bottom:16px}
+.dots i{display:block;width:10px;height:10px;border-radius:50%;background:#e0e0e0;font-style:normal}
+.dots i.on{background:#1a73e8}
+.dots i.ok{background:#34a853}
+.dots i.no{background:#ea4335}
+.qt{font-size:16px;font-weight:600;line-height:1.5;margin-bottom:14px}
+.opts button{display:block;width:100%;text-align:left;padding:12px 14px;border:2px solid #e8e8e8;border-radius:12px;background:#fafafa;font-size:15px;cursor:pointer;margin-bottom:8px;color:#333;line-height:1.4}
+.opts button.ok{border-color:#34a853;background:#e6f4ea}
+.opts button.no{border-color:#ea4335;background:#fce8e6}
+.rc{text-align:center;padding:16px 0}
+.rc .ri{font-size:56px;margin-bottom:10px}
+.rc .rt{font-size:20px;font-weight:700;margin-bottom:6px}
+.rc .rd{font-size:14px;color:#666;line-height:1.8;white-space:pre-line;margin-bottom:20px}
+.rc button{background:linear-gradient(135deg,#1a73e8,#4285f4);color:#fff;border:none;border-radius:25px;padding:10px 36px;font-size:16px;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1>🐟 摸鱼签签到</h1>
+    <p>上班不摸鱼，和咸鱼有什么区别</p>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="lb">📅 今天</span><span class="vl" id="sDate">--</span></div>
+    <div class="row"><span class="lb">⏰ 摸鱼窗口</span><span class="vl" id="sTime">--</span></div>
+    <div class="row"><span class="lb">🎣 今日摸鱼</span><span class="vl" id="sCnt">0/3</span></div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:15px;margin-bottom:8px">📊 本周摸鱼进度</h3>
+    <div class="week" id="weekEl"></div>
+  </div>
+
+  <div class="card reward" id="rewardEl">
+    <div class="ri">👑🧜‍♂️</div>
+    <h3>恭喜获得「人鱼王」称号！</h3>
+    <p>连续一周摸鱼成功，你是摸鱼界的王者！</p>
+  </div>
+
+  <div class="card fzone">
+    <h3>今日之鱼</h3>
+    <p class="fn" id="fishName">--</p>
+    <div class="fishbox"><span id="fishIcon" style="font-size:80px">🐟</span></div>
+    <button class="btn" id="goBtn">👋 摸鱼</button>
+    <div class="note" id="noteEl"></div>
+  </div>
+</div>
+
+<!-- 答题弹窗 -->
+<div class="mask" id="quizMask">
+  <div class="pop">
+    <div class="pt">🧠 摸鱼考验</div>
+    <div class="ps" id="quizSub">答对3题才能成功摸鱼哦</div>
+    <div class="dots" id="dotsEl"><i></i><i></i><i></i></div>
+    <div class="qt" id="qText">--</div>
+    <div class="opts" id="optsEl"></div>
+  </div>
+</div>
+
+<!-- 结果弹窗 -->
+<div class="mask" id="resMask">
+  <div class="pop">
+    <div class="rc">
+      <div class="ri" id="resIcon">🎉</div>
+      <div class="rt" id="resTitle">--</div>
+      <div class="rd" id="resDesc">--</div>
+      <button id="resClose">知道了</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var Q_LIST = [
+  // === 娱乐 ===
+  ["《黑神话：悟空》是由哪家公司开发的？","游戏科学","米哈游","腾讯天美"],
+  ["《原神》中的风神是谁？","温迪","钟离","雷电将军"],
+  ["《鱿鱼游戏》来自哪国？","韩国","日本","美国"],
+  ["2024年奥斯卡最佳影片是？","奥本海默","可怜的东西","芭比"],
+  ["《英雄联盟》的开发公司是？","Riot Games","Valve","暴雪"],
+  ["《庆余年2》首播平台？","腾讯视频","爱奇艺","优酷"],
+  ["2024年全球票房冠军是？","头脑特工队2","死侍与金刚狼","沙丘2"],
+  ["《三体》动画版由哪家公司制作？","艺画开天","B站","腾讯动漫"],
+  ["漫威电影宇宙的第一部电影是？","钢铁侠","美国队长","蜘蛛侠"],
+  ["宫崎骏2023年的新作叫什么？","你想活出怎样的人生","千与千寻2","天空之城2"],
+  ["综艺《歌手2024》哪位外国歌手引发热议？","Chanté Moore","Adele","Taylor Swift"],
+  ["王者荣耀中李白的大招叫什么？","青莲剑歌","将进酒","侠客行"],
+  ["GTA6预告片发布后打破了什么纪录？","24小时播放量纪录","预售纪录","评分纪录"],
+  ["《繁花》的导演是？","王家卫","张艺谋","陈凯歌"],
+  ["热门手游《蛋仔派对》的开发商是？","网易","腾讯","米哈游"],
+  ["周杰伦2023年的巡回演唱会叫什么？","嘉年华","地表最强","魔天伦"],
+  ["Switch上销量最高的游戏是？","马里奥赛车8豪华版","塞尔达传说","动物森友会"],
+  ["电影《流浪地球2》的导演是？","郭帆","吴京","刘慈欣"],
+  ["B站年度弹幕2024是哪个词？","接","绝","啊"],
+  ["迪士尼动画《疯狂动物城》的主角是？","兔子朱迪","狐狸尼克","树懒闪电"],
+  ["韩剧《黑暗荣耀》的女主角是？","宋慧乔","全智贤","孙艺珍"],
+  ["哈利波特系列中的魔法学校叫？","霍格沃茨","伊尔弗莫尼","德姆斯特朗"],
+  ["Steam平台上好评率最高的游戏之一是？","传送门2","GTA5","巫师3"],
+  ["动漫《咒术回战》中最强的角色是？","五条悟","宿傩","虎杖悠仁"],
+  ["Taylor Swift的2024年巡演叫什么？","Eras Tour","1989 Tour","Reputation Tour"],
+
+  // === 互联网 ===
+  ["ChatGPT是由哪家公司开发的？","OpenAI","Google","Meta"],
+  ["TikTok的母公司是？","字节跳动","腾讯","百度"],
+  ["马斯克收购的社交平台现在叫什么？","X","Thread","Bluesky"],
+  ["Anthropic推出的AI助手叫什么？","Claude","Bard","Gemini"],
+  ["哪家公司推出了文心一言？","百度","阿里巴巴","华为"],
+  ["全球最大电商平台(按GMV)是？","淘宝/天猫","亚马逊","拼多多"],
+  ["2024年热议的AI视频工具是？","Sora","Midjourney","Stable Diffusion"],
+  ["拼多多海外版叫什么？","Temu","Shein","Wish"],
+  ["微信月活用户约多少？","超过13亿","超过8亿","超过5亿"],
+  ["GitHub Copilot的AI来自？","OpenAI","Google","Anthropic"],
+  ["小红书英文名叫什么？","RED","Little Red Book","RedNote"],
+  ["全球最大流媒体音乐平台？","Spotify","Apple Music","网易云音乐"],
+  ["2024年因AI大涨的公司？","英伟达","AMD","高通"],
+  ["全球第一个月活超30亿的App是？","Facebook","微信","Instagram"],
+  ["阿里云的AI大模型叫什么？","通义千问","文心一言","混元"],
+  ["Notion AI集成的大模型来自？","Anthropic","OpenAI","Google"],
+  ["全球最大的代码托管平台是？","GitHub","GitLab","Bitbucket"],
+  ["抖音海外版TikTok在美国面临什么争议？","可能被禁","侵权诉讼","数据泄露罚款"],
+  ["哪个平台推出了Threads社交应用？","Meta","Google","微软"],
+  ["2024年中国AI独角兽月之暗面的产品是？","Kimi","豆包","通义"],
+  ["字节跳动的AI聊天助手叫？","豆包","Kimi","文心"],
+  ["B站的盈利模式主要依靠？","广告和游戏","会员订阅","直播打赏"],
+  ["亚马逊的云计算服务叫什么？","AWS","Azure","GCP"],
+  ["微软的AI助手叫什么？","Copilot","Cortana","Clippy"],
+  ["全球最大的外卖平台是？","美团","Uber Eats","DoorDash"],
+  ["Netflix的主要竞争对手包括？","Disney+","HBO Max","Amazon Prime"],
+  ["LinkedIn被哪家公司收购？","微软","谷歌","苹果"],
+  ["Zoom在哪一年因疫情爆火？","2020","2019","2021"],
+  ["全球注册开发者最多的应用商店是？","Google Play","App Store","华为应用市场"],
+  ["快手的海外版叫什么？","Kwai","SnackVideo","Lemon8"],
+  ["百度搜索在中国的主要竞争对手是？","必应和搜狗","谷歌和雅虎","360和神马"],
+  ["Midjourney是通过哪个平台使用的？","Discord","网页","App"],
+
+  // === 科技 ===
+  ["2024年全球市值最高科技公司？","苹果","微软","英伟达"],
+  ["苹果首款头显设备叫什么？","Vision Pro","Apple Glass","iView"],
+  ["特斯拉的人形机器人叫什么？","Optimus","Atlas","Pepper"],
+  ["全球芯片代工龙头企业是？","台积电","三星","中芯国际"],
+  ["比特币创始人化名是？","中本聪","V神","CZ"],
+  ["华为自研手机OS叫？","HarmonyOS","HongmengOS","LiteOS"],
+  ["谷歌的AI大模型叫？","Gemini","Bard","PaLM"],
+  ["SpaceX可回收火箭叫？","Falcon 9","Atlas V","长征五号"],
+  ["中国空间站叫什么？","天宫","神舟","嫦娥"],
+  ["最先进的光刻机厂商是？","ASML","尼康","佳能"],
+  ["全球首款折叠屏手机厂商？","三星","华为","摩托罗拉"],
+  ["世界第一台通用电子计算机叫？","ENIAC","UNIVAC","Colossus"],
+  ["5G的理论峰值下载速度约？","20Gbps","1Gbps","100Mbps"],
+  ["USB-C接口最初由谁推出？","USB-IF组织","苹果","英特尔"],
+  ["全球最大的无人机厂商是？","大疆","Parrot","Skydio"],
+  ["ChatGPT用的底层架构是？","Transformer","RNN","CNN"],
+  ["iPhone首次取消充电口是哪一代？","还没有取消","iPhone 15","iPhone 14"],
+  ["世界上第一个网站是关于什么的？","万维网项目本身","新闻","购物"],
+  ["蓝牙技术名字来源于？","丹麦国王","蓝色的牙齿","发明者姓名"],
+  ["特斯拉的自动驾驶系统叫什么？","Autopilot/FSD","DriveAI","AutoNav"],
+  ["CPU和GPU的主要区别是？","GPU更擅长并行计算","GPU更快","CPU更省电"],
+  ["马斯克的脑机接口公司叫？","Neuralink","BrainCo","Kernel"],
+  ["4nm芯片的4nm指的是什么？","晶体管制程工艺","芯片厚度","芯片面积"],
+  ["全球最长的海底隧道在哪？","英法海峡","日本青函","港珠澳"],
+  ["James Webb太空望远镜是谁制造的？","NASA","SpaceX","ESA"],
+  ["第一款商用5G手机是哪家推出的？","三星","华为","小米"],
+  ["全球最大的锂电池制造商是？","宁德时代","比亚迪","LG新能源"],
+  ["Wi-Fi 7的理论最高速度约？","46Gbps","10Gbps","5Gbps"],
+  ["苹果M系列芯片基于什么架构？","ARM","x86","RISC-V"],
+  ["量子计算的基本单位叫什么？","量子比特/qubit","字节","比特"],
+  ["中国北斗导航覆盖范围是？","全球","亚太地区","仅中国"],
+  ["目前AI训练最常用的GPU是？","NVIDIA A100/H100","AMD MI300","Intel Gaudi"],
+  ["ChatGPT最初发布于哪一年？","2022年","2023年","2021年"],
+  ["马斯克创办的火星移民计划叫？","星舰计划","火星一号","红色星球"]
+];
+
+var FISH = [[1,"石斑鱼","🐟"],[2,"鲨鱼","🦈"],[3,"鲸鱼","🐋"],[4,"鳗鱼","🐍"],[5,"比目鱼","🐠"]];
+var DN = ["周日","周一","周二","周三","周四","周五","周六"];
+var DN5 = ["周一","周二","周三","周四","周五"];
+
+// --- 状态 ---
+var gState = null;
+var gQuiz = null;
+
+function loadSt() {
+  try { gState = JSON.parse(localStorage.getItem("moyu_v4")); } catch(e) {}
+  if (!gState || !gState.w) gState = {w:{}, r:[]};
+}
+function saveSt() {
+  try { localStorage.setItem("moyu_v4", JSON.stringify(gState)); } catch(e) {}
+}
+function gDow() { var d = new Date().getDay(); return d === 0 ? 7 : d; }
+function gWk() {
+  var n = new Date(), y = new Date(n.getFullYear(),0,1);
+  return n.getFullYear() + "W" + Math.ceil((Math.floor((n-y)/864e5) + y.getDay() + 1) / 7);
+}
+function gCnt() { var d = gState.w[gWk()]; return d ? (d[gDow()]||0) : 0; }
+function gAdd() {
+  var k=gWk(), d=gDow();
+  if(!gState.w[k]) gState.w[k]={};
+  gState.w[k][d]=(gState.w[k][d]||0)+1;
+  saveSt();
+}
+function gWkOk() {
+  var d=gState.w[gWk()]; if(!d) return false;
+  for(var i=1;i<=5;i++) if(!d[i]||d[i]<3) return false;
+  return true;
+}
+function gIsWt() { var d=gDow(),h=new Date().getHours(); return d<=5&&h>=10&&h<18; }
+
+// --- 刷新UI ---
+function refresh() {
+  var n=new Date(), wt=gIsWt(), c=gCnt(), d=gDow();
+  var fi = d<=5 ? FISH[d-1] : FISH[0];
+
+  document.getElementById("sDate").textContent = (n.getMonth()+1)+"月"+n.getDate()+"日 "+DN[n.getDay()];
+  var te = document.getElementById("sTime");
+  te.textContent = wt?"摸鱼中...":"非摸鱼时段";
+  te.className = "vl "+(wt?"green":"red");
+  var ce = document.getElementById("sCnt");
+  ce.textContent = c+"/3";
+  ce.className = "vl "+(c>=3?"green":"");
+
+  document.getElementById("fishName").textContent = (fi?fi[1]:"鱼")+" · "+(DN5[d-1]||"今日")+"之鱼";
+  document.getElementById("fishIcon").textContent = fi?fi[2]:"🐟";
+  document.getElementById("fishIcon").style.fontSize = (80+c*12)+"px";
+
+  var btn = document.getElementById("goBtn");
+  if (wt && c>=3) {
+    btn.disabled = true;
+    btn.textContent = "✅ 今日已完成";
+  } else if (wt) {
+    btn.disabled = false;
+    btn.textContent = "👋 摸鱼（"+c+"/3）";
+  } else {
+    btn.disabled = false;
+    btn.textContent = "🎮 体验摸鱼";
+  }
+  document.getElementById("noteEl").textContent = wt?"":"非摸鱼时段(10:00-18:00)，体验不计入进度";
+
+  // 周进度
+  var we = document.getElementById("weekEl");
+  we.innerHTML = "";
+  var wd = gState.w[gWk()]||{};
+  for(var i=1;i<=5;i++){
+    var ic=wd[i]||0, ok=ic>=3, cur=i===d;
+    var s='<div class="di"><div class="dn">'+DN5[i-1]+'</div>';
+    s+='<div class="dc'+(ok?' ok':'')+(cur?' cur':'')+'">'+FISH[i-1][2]+'</div>';
+    s+='<div class="ct">'+ic+'/3</div></div>';
+    we.innerHTML += s;
+  }
+
+  var re = document.getElementById("rewardEl");
+  re.className = gWkOk()?"card reward show":"card reward";
+}
+
+// --- 答题 ---
+function pick3() {
+  var a=Q_LIST.slice(), r=[];
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  for(var k=0;k<3;k++){
+    var q=a[k], right=q[1], opts=q.slice(1);
+    for(var m=opts.length-1;m>0;m--){var j2=Math.floor(Math.random()*(m+1));var t2=opts[m];opts[m]=opts[j2];opts[j2]=t2;}
+    r.push({q:q[0], o:opts, a:opts.indexOf(right)});
+  }
+  return r;
+}
+
+function startQuiz() {
+  var wt=gIsWt(), c=gCnt();
+  if(wt && c>=3) return;
+  gQuiz = {qs:pick3(), i:0, ok:0, pr:!wt};
+  showQ();
+  document.getElementById("quizMask").className="mask show";
+}
+
+function showQ() {
+  var q=gQuiz.qs[gQuiz.i];
+  document.getElementById("qText").textContent = q.q;
+  document.getElementById("quizSub").textContent = "第"+(gQuiz.i+1)+"/3题 · 答对全部才算成功";
+
+  var dots=document.getElementById("dotsEl").children;
+  for(var i=0;i<3;i++){
+    dots[i].className = i<gQuiz.i?"ok":(i===gQuiz.i?"on":"");
+  }
+
+  var oe=document.getElementById("optsEl");
+  oe.innerHTML="";
+  for(var j=0;j<q.o.length;j++){
+    var b=document.createElement("button");
+    b.textContent=String.fromCharCode(65+j)+". "+q.o[j];
+    b.setAttribute("data-j",j);
+    b.onclick=onPick;
+    oe.appendChild(b);
+  }
+}
+
+function onPick(ev) {
+  var j=parseInt(ev.target.getAttribute("data-j"));
+  var q=gQuiz.qs[gQuiz.i];
+  var bs=document.getElementById("optsEl").children;
+  for(var i=0;i<bs.length;i++) bs[i].onclick=null;
+
+  var dots=document.getElementById("dotsEl").children;
+  if(j===q.a){
+    bs[j].className="ok";
+    dots[gQuiz.i].className="ok";
+    gQuiz.ok++;
+  } else {
+    bs[j].className="no";
+    bs[q.a].className="ok";
+    dots[gQuiz.i].className="no";
+  }
+
+  setTimeout(function(){
+    gQuiz.i++;
+    if(gQuiz.i<3) showQ();
+    else endQuiz();
+  },700);
+}
+
+function endQuiz(){
+  document.getElementById("quizMask").className="mask";
+  var win=gQuiz.ok===3;
+  if(win && !gQuiz.pr) gAdd();
+
+  // wow
+  if(win){
+    var fe=document.getElementById("fishIcon");
+    fe.style.transition="transform .5s";
+    fe.style.transform="scale(1.4) rotate(10deg)";
+    setTimeout(function(){fe.style.transform="scale(1.15)";},600);
+    setTimeout(function(){fe.style.transition="";fe.style.transform="";},3000);
+  }
+
+  var fi=FISH[gDow()-1]||FISH[0];
+  if(win){
+    document.getElementById("resIcon").textContent="🎉";
+    document.getElementById("resTitle").textContent=gQuiz.pr?"体验成功！":"摸鱼成功！";
+    var m="成功摸到"+fi[1]+"！";
+    if(gQuiz.pr) m+="\n工作时段(10:00-18:00)才计入进度";
+    else{var c2=gCnt();m+="\n今日进度 "+c2+"/3";if(c2>=3)m+="\n🎊 今日任务完成！";}
+    if(!gQuiz.pr&&gWkOk()) m+="\n\n👑 连续一周成功！获得「人鱼王」！";
+    document.getElementById("resDesc").textContent=m;
+  }else{
+    document.getElementById("resIcon").textContent="😢";
+    document.getElementById("resTitle").textContent="摸鱼失败...";
+    document.getElementById("resDesc").textContent="答对了 "+gQuiz.ok+"/3 题\n需要全部答对才能成功\n再试一次！";
+  }
+  document.getElementById("resMask").className="mask show";
+  refresh();
+}
+
+// --- 绑定事件 ---
+document.getElementById("goBtn").onclick = function(){ startQuiz(); };
+document.getElementById("resClose").onclick = function(){ document.getElementById("resMask").className="mask"; };
+
+// --- 启动 ---
+loadSt();
+refresh();
+setInterval(refresh, 60000);
+</script>
+</body>
+</html>
