@@ -312,7 +312,7 @@ function refresh() {
     btn.disabled = false;
     btn.textContent = "🎮 体验摸鱼";
   }
-  document.getElementById("noteEl").textContent = wt?"":"非摸鱼时段(9:00-18:00)，体验不计入进度";
+  document.getElementById("noteEl").textContent = wt?"":"当前为非摸鱼时段(0:00-9:00, 18:00-24:00)，体验不计入进度";
 
   // 周进度
   var we = document.getElementById("weekEl");
@@ -414,7 +414,7 @@ function endQuiz(){
     document.getElementById("resIcon").textContent="🎉";
     document.getElementById("resTitle").textContent=gQuiz.pr?"体验成功！":"摸鱼成功！";
     var m="成功摸到"+fi[1]+"！";
-    if(gQuiz.pr) m+="\n工作时段(9:00-18:00)才计入进度";
+    if(gQuiz.pr) m+="\n摸鱼时段为9:00-18:00，其余时间不计入进度";
     else{var c2=gCnt();m+="\n今日进度 "+c2+"/3";if(c2>=3)m+="\n🎊 今日任务完成！";}
     if(!gQuiz.pr&&gWkOk()) m+="\n\n👑 连续一周成功！获得「人鱼王」！";
     document.getElementById("resDesc").textContent=m;
